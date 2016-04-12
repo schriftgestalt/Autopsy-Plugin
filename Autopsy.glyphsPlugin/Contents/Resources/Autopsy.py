@@ -97,7 +97,7 @@ class GlyphsPluginAutopsy ( NSObject, GlyphsPluginProtocol ):
 			self.logToConsole( "interfaceVersion: %s" % str(e) )
 	
 	def showWindow(self):
-		print "__window"
+		#print "__window"
 		
 		self.glyphlist = []
 		Font = Glyphs.orderedDocuments()[0].font
