@@ -760,7 +760,7 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 		if font.glyphs.has_key(glyph):
 			g = font.glyphs[glyph]
 			
-			if Glyphs.defaults["com_yanone_Autopsy_outline_filled"]:
+			if Glyphs.intDefaults["Autopsy.OutlineStyle"] == 0:
 				myglyphfillcolour = glyphcolour
 				myglyphstrokecolour = None
 				myglyphstrokewidth = 0
