@@ -101,8 +101,9 @@ class GlyphsPluginAutopsy ( NSObject, GlyphsPluginProtocol ):
 		
 		self.glyphlist = []
 		Font = Glyphs.orderedDocuments()[0].font
-		for Layer in Font.selectedLayers:
-			self.glyphlist.append(Layer.parent.name)
+		if Font.selectedLayers is not None:
+			for Layer in Font.selectedLayers:
+				self.glyphlist.append(Layer.parent.name)
 		self.mode = 'normal' # TODO implement proper handling of MM
 		self._fontListController.setContent_(NSDocumentController.sharedDocumentController().valueForKeyPath_("documents.font"))
 		self._window.makeKeyAndOrderFront_(self)

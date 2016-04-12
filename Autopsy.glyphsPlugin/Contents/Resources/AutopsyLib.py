@@ -1,4 +1,4 @@
-#MenuTitle: Autopsy 1.2
+#MenuTitle: Autopsy 1.3
 # encoding: utf-8
 
 
@@ -6,11 +6,12 @@
 ########################################################################
 #
 #   Autopsy Visual Font Auditing
-#   1.2
+#   1.3
 #
 #   Version for Glyphs (glyphsapp.com)
 #   (c) 2009 by Yanone
 #   2013 Georg Seifert, porting to use CoreGraphics instead of RepordLab to write PDF
+#   2016 Jens Kutilek, fixes
 #
 #   http://www.yanone.de/typedesign/autopsy/
 #
@@ -49,8 +50,8 @@ class Ddict(dict):
 ##### Settings
 
 programname = 'Autopsy'
-programversion = '1.2'
-releasedate = '201311100012'
+programversion = '1.3'
+releasedate = '201604121821'
 verbose = False
 
 availablegraphs = ('width', 'bboxwidth', 'bboxheight', 'highestpoint', 'lowestpoint', 'leftsidebearing', 'rightsidebearing')
@@ -529,8 +530,9 @@ def collectglyphnames():
 	
 	glyphlist = []
 	Font = Glyphs.orderedDocuments()[0].font
-	for Layer in Font.selectedLayers:
-		glyphlist.append(Layer.parent.name)
+	if Font.selectedLayers is not None:
+		for Layer in Font.selectedLayers:
+			glyphlist.append(Layer.parent.name)
 	
 	return glyphlist
 
@@ -656,7 +658,7 @@ def drawTitlePage(fonts):
 		lines.append((pdffont['Regular'], 18, headlinefontcolour, xoffset, 30, patient + ':'))
 		yoffset -= 5
 		for myfont in fonts:
-			lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, str(myfont.familyName))) # + ' v' + str(myfont.version)))
+			lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, "%s %s" % (myfont.familyName, myfont.instances[0].name))) # + ' v' + str(myfont.version)))
 		# get designers(s)
 		designers = Ddict(dict)
 		for f in fonts:
