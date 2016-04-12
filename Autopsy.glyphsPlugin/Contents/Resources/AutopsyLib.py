@@ -658,7 +658,10 @@ def drawTitlePage(fonts):
 		lines.append((pdffont['Regular'], 18, headlinefontcolour, xoffset, 30, patient + ':'))
 		yoffset -= 5
 		for myfont in fonts:
-			lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, "%s %s" % (myfont.familyName, myfont.instances[0].name))) # + ' v' + str(myfont.version)))
+			if myfont.instances[0] is None:
+				lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, u"%s —" % (myfont.familyName))) # + ' v' + str(myfont.version)))
+			else:
+				lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, "%s %s" % (myfont.familyName, myfont.instances[0].name))) # + ' v' + str(myfont.version)))
 		# get designers(s)
 		designers = Ddict(dict)
 		for f in fonts:
