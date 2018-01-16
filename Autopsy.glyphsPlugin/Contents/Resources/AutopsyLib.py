@@ -21,7 +21,7 @@
 
 
 from GlyphsApp import *
-from Foundation import NSURL, NSMakeRect, NSTemporaryDirectory
+from Foundation import NSURL, NSAffineTransform, NSMakeRect, NSTemporaryDirectory
 from AppKit import NSFont, NSColor, NSAttributedString, NSBezierPath, NSGraphicsContext, NSFontAttributeName, NSForegroundColorAttributeName
 import time, os, string, math, random
 import traceback
@@ -393,68 +393,15 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 	if Glyphs.boolDefaults["com_yanone_Autopsy_fontnamesunderglyph"]:
 		DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, xoffset*mm + 2, yoffset*mm - 8, f.familyName)
 
-
-def PSCommandsFromGlyph(glyph):
-
-	CommandsList = []
-
-	for path in glyph.paths:
-		lastNode = None
-		if path.closed:
-			lastNode = path.nodes[-1]
-		else:
-			lastNode = path.nodes[0]
-		CommandsList.append(('moveTo', (lastNode.x, lastNode.y)))
-		for i, node in enumerate(path.nodes):
-			
-			if node.type == GSOFFCURVE:
-				CommandsList.append(('close', (node.x, node.y)))
-			
-			#if node.type == nMOVE:
-			#	CommandsList.append(('moveTo', (node.x, node.y)))
-
-			if node.type == GSLINE:
-				CommandsList.append(('lineTo', (node.x, node.y)))
-
-			if node.type == GSCURVE:
-				CurveCommandsList = []
-				CurveCommandsList.append('curveTo')
-				
-				#for point in node.points:
-				CurveCommandsList.append( (node.x, node.y) )
-				point = path.nodes[i-2]
-				CurveCommandsList.append( (point.x, point.y) )
-				point = path.nodes[i-1]
-				CurveCommandsList.append( (point.x, point.y) )
-				
-				CommandsList.append(CurveCommandsList)
-
-	return CommandsList
-
 def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokecolour, strokewidth, dashed):
 	if not PSCommands:
-		
-		type = "glyph"
-		
-		# Copy glyph into memory (so remove overlap won't affect the current font)
-		g = glyph.layers[0]
-		if len(g.components) > 0:
-			for component in g.components:
-				position = component.position
-				DrawGlyph(f, component.component, None, xoffset+(position.x*ratio/mm), yoffset+(position.y*ratio/mm), ratio, fillcolour, strokecolour, strokewidth, dashed)
-	
-		# Glyph has nodes of its own
-		if len(g.paths):
-			PSCommands = PSCommandsFromGlyph(g)
-			#print PSCommands
-		else:
-			PSCommands = ()
-		
+		layer = glyph.layers[0]
+		p = layer.drawBezierPath
+		transform = NSAffineTransform.new()
+		transform.translateXBy_yBy_(xoffset*mm, yoffset*mm)
+		transform.scaleBy_(ratio)
+		p.transformUsingAffineTransform_(transform)
 	else:
-		type = "PScommands"
-
-
-	if PSCommands:
 		p = NSBezierPath.bezierPath()
 		
 		for command in PSCommands:
@@ -484,17 +431,17 @@ def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokec
 					points.append( (xoffset*mm + point[0] * ratio, yoffset*mm + point[1] * ratio) )
 				
 				p.curveToPoint_controlPoint1_controlPoint2_(points[0], points[1], points[2])
-	
 		p.closePath()
-		if fillcolour:
-			NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(fillcolour[0], fillcolour[1], fillcolour[2], fillcolour[3], 1).set()
-			p.fill()
-		if strokecolour:
-			NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(strokecolour[0], strokecolour[1], strokecolour[2], strokecolour[3], 1).set()
-			if dashed:
-				p.setLineDash_count_phase_(dashed, 2, 0.0)
-			p.setLineWidth_(strokewidth)
-			p.stroke()
+	
+	if fillcolour:
+		NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(fillcolour[0], fillcolour[1], fillcolour[2], fillcolour[3], 1).set()
+		p.fill()
+	if strokecolour:
+		NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(strokecolour[0], strokecolour[1], strokecolour[2], strokecolour[3], 1).set()
+		if dashed:
+			p.setLineDash_count_phase_(dashed, 2, 0.0)
+		p.setLineWidth_(strokewidth)
+		p.stroke()
 
 
 
