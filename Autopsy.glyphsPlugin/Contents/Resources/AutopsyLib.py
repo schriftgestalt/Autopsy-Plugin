@@ -20,12 +20,14 @@
 ########################################################################
 
 
-from AppKit import *
+from GlyphsApp import *
+from Foundation import NSURL, NSUserDefaults, NSMakeRect, NSTemporaryDirectory
+from AppKit import NSFont, NSColor, NSAttributedString, NSBezierPath, NSGraphicsContext, NSFontAttributeName, NSForegroundColorAttributeName
 import time, os, string, math, random
 import traceback
-from Quartz.CoreGraphics import *
+from Quartz.CoreGraphics import CGRectMake, CGPDFContextCreateWithURL, CGPDFContextBeginPage, CGPDFContextEndPage, CGPDFContextClose
 
-from GlyphsApp import *
+
 
 cm = 72/2.54
 mm = cm / 10
