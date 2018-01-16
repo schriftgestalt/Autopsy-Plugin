@@ -179,16 +179,16 @@ class Report:
 			for glyph in glyphs:
 				
 				try:
-					if reports[glyph][self.graphname].min < mymin:
-						mymin = reports[glyph][self.graphname].min
+					if reports[glyphName][self.graphname].min < mymin:
+						mymin = reports[glyphName][self.graphname].min
 				except:
-					mymin = reports[glyph][self.graphname].min
+					mymin = reports[glyphName][self.graphname].min
 				
 				try:
-					if reports[glyph][self.graphname].max > mymax:
-						mymax = reports[glyph][self.graphname].max
+					if reports[glyphName][self.graphname].max > mymax:
+						mymax = reports[glyphName][self.graphname].max
 				except:
-					mymax = reports[glyph][self.graphname].max
+					mymax = reports[glyphName][self.graphname].max
 				
 		if mymax - mymin < 10:
 			mymin -= 5
@@ -695,14 +695,14 @@ def drawTitlePage(fonts):
 		print traceback.format_exc()
 		
 
-def drawGlyph(fonts, glyph, i, ratio, reports):
-	output('-- ' + glyph + ' --')
+def drawGlyph(fonts, glyphName, i, ratio, reports):
+	output('-- ' + glyphName + ' --')
 	global graphcoords
 	global scrapboard
 	# if not tick:
 	# 	raiseerror('Aborted by user.')
 	# 	break
-	#glyphindex = fonts[0].glyphs[glyph)
+	#glyphindex = fonts[0].glyphs[glyphName)
 
 	# Draw scrapboard into page
 	if drawboards:
@@ -710,11 +710,11 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 		#drawrect(graphcoords['left']*mm, graphcoords['bottom']*mm, graphcoords['right']*mm, graphcoords['top']*mm, '', scrapboardcolour, metricslinewidth, None, 0)
 		pass
 	try:
-		unicodes = 'u' + string.join(map(unicode2hex, fonts[0].glyphs[glyph.name].unicodes), "u u") + 'u'
+		unicodes = 'u' + string.join(map(unicode2hex, fonts[0].glyphs[glyphName].unicodes), "u u") + 'u'
 	except:
 		unicodes = ''
 	# print '-', fonts[0][glyphindex], '-'
-	DrawHeadlineIntoPage("/%s/ #%d# %s" % (glyph, i, unicodes))
+	DrawHeadlineIntoPage("/%s/ #%d# %s" % (glyphName, i, unicodes))
 
 	# Initial offset
 
@@ -733,10 +733,10 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 
 	for i_f, font in enumerate(fonts):
 
-		if font.glyphs.has_key(glyph):
-			g = font.glyphs[glyph]
-		elif not font.glyphs.has_key(glyph) and fonts[i_f-1].glyphs.has_key(glyph):
-			g = fonts[i_f-1].glyphs[glyph]
+		if font.glyphs.has_key(glyphName):
+			g = font.glyphs[glyphName]
+		elif not font.glyphs.has_key(glyphName) and fonts[i_f-1].glyphs.has_key(glyphName):
+			g = fonts[i_f-1].glyphs[glyphName]
 		
 		DrawMetrics(font, g, xoffset, yoffset, ratio)
 
@@ -762,8 +762,8 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 	for i_f, font in enumerate(fonts):
 		
 		# Glyph is in font
-		if font.glyphs.has_key(glyph):
-			g = font.glyphs[glyph]
+		if font.glyphs.has_key(glyphName):
+			g = font.glyphs[glyphName]
 			
 			if Glyphs.intDefaults["Autopsy.OutlineStyle"] == 0:
 				myglyphfillcolour = glyphcolour
@@ -777,8 +777,8 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 				myglyphdashed = None
 		
 		# Glyph is missing in font, draw replacement glyph
-		elif not font.glyphs.has_key(glyph) and fonts[i_f-1].glyphs.has_key(glyph):
-			g = fonts[i_f-1].glyphs[glyph]
+		elif not font.glyphs.has_key(glyphName) and fonts[i_f-1].glyphs.has_key(glyphName):
+			g = fonts[i_f-1].glyphs[glyphName]
 			myglyphfillcolour = None
 			myglyphstrokecolour = glyphcolour
 			myglyphstrokewidth = 1
@@ -802,33 +802,33 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 	tableobjects = []
 	for table in availablegraphs:
 		if Glyphs.boolDefaults["com_yanone_Autopsy_graph_"+table]:
-			reports[glyph][table].glyphname = glyph
-			reports[glyph][table].graphname = table
-			reports[glyph][table].drawpointsvalues = Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]
+			reports[glyphName][table].glyphname = glyphName
+			reports[glyphName][table].graphname = table
+			reports[glyphName][table].drawpointsvalues = Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]
 			
-			reports[glyph][table].scope = Glyphs.defaults["com_yanone_Autopsy_graph_"+table + '_scope']
+			reports[glyphName][table].scope = Glyphs.defaults["com_yanone_Autopsy_graph_"+table + '_scope']
 			
 			if graphcolour.has_key(table):
-				reports[glyph][table].strokecolour = graphcolour[table]
+				reports[glyphName][table].strokecolour = graphcolour[table]
 			else:
-				reports[glyph][table].strokecolour = graphcolour['__default__']
-			tableobjects.append(reports[glyph][table])
+				reports[glyphName][table].strokecolour = graphcolour['__default__']
+			tableobjects.append(reports[glyphName][table])
 
 	# Calculate bbox for graphs an draw them
 
 	for t, table in enumerate(tableobjects):
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
 			tablewidth = ((graphcoords['right'] - graphcoords['left']) - (tableseparator * (len(tableobjects) - 1))) / len(tableobjects)
-			tableheight = reports[glyph]['height'].sum/mm*ratio
+			tableheight = reports[glyphName]['height'].sum/mm*ratio
 			table.left = graphcoords['left'] + t * (tablewidth + tableseparator)
 			table.right = table.left + tablewidth
 			table.top = graphcoords['top']
 			table.bottom = table.top - tableheight
 		else:
-			if reports[glyph]['width']:
-				tablewidth = reports[glyph]['width'].sum/mm*ratio
+			if reports[glyphName]['width']:
+				tablewidth = reports[glyphName]['width'].sum/mm*ratio
 			else:
-				tablewidth = reports[glyph]['bboxwidth'].sum/mm*ratio
+				tablewidth = reports[glyphName]['bboxwidth'].sum/mm*ratio
 			tableheight = ((graphcoords['top'] - graphcoords['bottom']) - (tableseparator * (len(tableobjects) - 1))) / len(tableobjects)
 			table.left = graphcoords['left']
 			table.right = table.left + tablewidth
@@ -837,12 +837,12 @@ def drawGlyph(fonts, glyph, i, ratio, reports):
 		table.draw()
 
 	# PDF Bookmarks
-	# pdf.bookmarkPage(glyph)
-	# pdf.addOutlineEntry(None, glyph, 0, 0)
+	# pdf.bookmarkPage(glyphName)
+	# pdf.addOutlineEntry(None, glyphName, 0, 0)
 	
 
-def runAutopsy(fonts, glyphs):
-	if fonts and glyphs:
+def runAutopsy(fonts, glyphNames):
+	if fonts and glyphNames:
 		
 		starttime = time.time()
 		
@@ -881,49 +881,49 @@ def runAutopsy(fonts, glyphs):
 		maxheight = 0
 		maxsingleheight = 0
 		
-		for glyph in glyphs:
+		for glyphName in glyphNames:
 	
-			glyphwidth[glyph] = 0
-			glyphheight[glyph] = 0
-			maxwidthperglyph[glyph] = 0
-			maxheightperglyph[glyph] = 0
-			reports[glyph]['width'] = Report()
-			reports[glyph]['height'] = Report()
-			reports[glyph]['bboxwidth'] = Report()
-			reports[glyph]['bboxheight'] = Report()
-			reports[glyph]['highestpoint'] = Report()
-			reports[glyph]['lowestpoint'] = Report()
-			reports[glyph]['leftsidebearing'] = Report()
-			reports[glyph]['rightsidebearing'] = Report()
+			glyphwidth[glyphName] = 0
+			glyphheight[glyphName] = 0
+			maxwidthperglyph[glyphName] = 0
+			maxheightperglyph[glyphName] = 0
+			reports[glyphName]['width'] = Report()
+			reports[glyphName]['height'] = Report()
+			reports[glyphName]['bboxwidth'] = Report()
+			reports[glyphName]['bboxheight'] = Report()
+			reports[glyphName]['highestpoint'] = Report()
+			reports[glyphName]['lowestpoint'] = Report()
+			reports[glyphName]['leftsidebearing'] = Report()
+			reports[glyphName]['rightsidebearing'] = Report()
 			for font in fonts:
 				FontMaster = font.masters[0]
-				if font.glyphs.has_key(glyph):
-					g = font.glyphs[glyph].layers[FontMaster.id]
+				if font.glyphs.has_key(glyphName):
+					g = font.glyphs[glyphName].layers[FontMaster.id]
 					#print "__g", g
-					glyphwidth[glyph] = g.width
+					glyphwidth[glyphName] = g.width
 					height = ascender(font) - descender(font)
 
-					widthforgraph = glyphwidth[glyph]
+					widthforgraph = glyphwidth[glyphName]
 					if widthforgraph == 0:
 						widthforgraph = g.bounds.size.width
 					heightforgraph = height
 	
 					# width of kegel
-					reports[glyph]['width'].addvalue((glyphwidth[glyph], widthforgraph, heightforgraph))
+					reports[glyphName]['width'].addvalue((glyphwidth[glyphName], widthforgraph, heightforgraph))
 					# sum of widths per glyph
-					if reports[glyph]['width'].sum > maxwidth:
-						maxwidth = reports[glyph]['width'].sum
-					if reports[glyph]['width'].max > maxsinglewidth:
-						maxsinglewidth = reports[glyph]['width'].max
+					if reports[glyphName]['width'].sum > maxwidth:
+						maxwidth = reports[glyphName]['width'].sum
+					if reports[glyphName]['width'].max > maxsinglewidth:
+						maxsinglewidth = reports[glyphName]['width'].max
 						
 					# height of kegel
-					glyphheight[glyph] = height
-					reports[glyph]['height'].addvalue((glyphheight[glyph], widthforgraph, heightforgraph))
+					glyphheight[glyphName] = height
+					reports[glyphName]['height'].addvalue((glyphheight[glyphName], widthforgraph, heightforgraph))
 					# sum of heights per glyph
-					if reports[glyph]['height'].sum > maxheight:
-						maxheight = reports[glyph]['height'].sum
-					if reports[glyph]['height'].max > maxsingleheight:
-						maxsingleheight = reports[glyph]['height'].max
+					if reports[glyphName]['height'].sum > maxheight:
+						maxheight = reports[glyphName]['height'].sum
+					if reports[glyphName]['height'].max > maxsingleheight:
+						maxsingleheight = reports[glyphName]['height'].max
 					
 					# BBox
 					overthetop = 20000
@@ -931,29 +931,29 @@ def runAutopsy(fonts, glyphs):
 					bbox = g.bounds
 					
 					if bbox.size.width < -1*overthetop or bbox.size.width > overthetop:
-						reports[glyph]['bboxwidth'].addvalue((0, widthforgraph, heightforgraph))
+						reports[glyphName]['bboxwidth'].addvalue((0, widthforgraph, heightforgraph))
 					else:
-						reports[glyph]['bboxwidth'].addvalue((bbox.size.width, widthforgraph, heightforgraph))
+						reports[glyphName]['bboxwidth'].addvalue((bbox.size.width, widthforgraph, heightforgraph))
 					
 					if bbox.size.height < -1*overthetop or bbox.size.height > overthetop:
-						reports[glyph]['bboxheight'].addvalue((0, widthforgraph, heightforgraph))
+						reports[glyphName]['bboxheight'].addvalue((0, widthforgraph, heightforgraph))
 					else:
-						reports[glyph]['bboxheight'].addvalue((bbox.size.height, widthforgraph, heightforgraph))
+						reports[glyphName]['bboxheight'].addvalue((bbox.size.height, widthforgraph, heightforgraph))
 					
 					
 					if (bbox.origin.y + bbox.size.height) < -1*overthetop or (bbox.origin.y + bbox.size.height) > overthetop:
-						reports[glyph]['highestpoint'].addvalue((0, widthforgraph, heightforgraph))
+						reports[glyphName]['highestpoint'].addvalue((0, widthforgraph, heightforgraph))
 					else:
-						reports[glyph]['highestpoint'].addvalue((bbox.origin.y + bbox.size.height, widthforgraph, heightforgraph))
+						reports[glyphName]['highestpoint'].addvalue((bbox.origin.y + bbox.size.height, widthforgraph, heightforgraph))
 					
 					if bbox.origin.y < -1*overthetop or bbox.origin.y > overthetop:
-						reports[glyph]['lowestpoint'].addvalue((0, widthforgraph, heightforgraph))
+						reports[glyphName]['lowestpoint'].addvalue((0, widthforgraph, heightforgraph))
 					else:
-						reports[glyph]['lowestpoint'].addvalue((bbox.origin.y, widthforgraph, heightforgraph))
+						reports[glyphName]['lowestpoint'].addvalue((bbox.origin.y, widthforgraph, heightforgraph))
 					
 					# L + R sidebearing
-					reports[glyph]['leftsidebearing'].addvalue((g.LSB, widthforgraph, heightforgraph))
-					reports[glyph]['rightsidebearing'].addvalue((g.RSB, widthforgraph, heightforgraph))
+					reports[glyphName]['leftsidebearing'].addvalue((g.LSB, widthforgraph, heightforgraph))
+					reports[glyphName]['rightsidebearing'].addvalue((g.RSB, widthforgraph, heightforgraph))
 
 		
 
@@ -1014,9 +1014,9 @@ def runAutopsy(fonts, glyphs):
 			### MAIN PAGES ###
 		
 			
-			for i, glyph in enumerate(glyphs):
+			for i, glyphName in enumerate(glyphNames):
 				CGPDFContextBeginPage(pdfContext, None)
-				drawGlyph(fonts, glyph, i, ratio, reports)
+				drawGlyph(fonts, glyphName, i, ratio, reports)
 				# End page
 				CGPDFContextEndPage(pdfContext)
 			
@@ -1029,7 +1029,7 @@ def runAutopsy(fonts, glyphs):
 			NSGraphicsContext.restoreGraphicsState()
 			CGPDFContextClose(pdfContext)
 		
-		output("time: " + str(time.time() - starttime) + "sec, ca." + str((time.time() - starttime) / len(glyphs)) + "sec per glyph")
+		output("time: " + str(time.time() - starttime) + "sec, ca." + str((time.time() - starttime) / len(glyphNames)) + "sec per glyph")
 		
 		
 		if errors:
