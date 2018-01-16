@@ -21,7 +21,7 @@
 
 
 from GlyphsApp import *
-from Foundation import NSURL, NSUserDefaults, NSMakeRect, NSTemporaryDirectory
+from Foundation import NSURL, NSMakeRect, NSTemporaryDirectory
 from AppKit import NSFont, NSColor, NSAttributedString, NSBezierPath, NSGraphicsContext, NSFontAttributeName, NSForegroundColorAttributeName
 import time, os, string, math, random
 import traceback
@@ -994,7 +994,7 @@ def runAutopsy(fonts, glyphNames):
 		
 		
 		# PDF Init stuff
-		filename = NSUserDefaults.standardUserDefaults().objectForKey_("com_yanone_Autopsy_filename")
+		filename = Glyphs.defaults["com_yanone_Autopsy_filename"]
 		tempFileName = NSTemporaryDirectory()+"%d.pdf"%random.randint(1000,100000)
 		
 		pageRect = CGRectMake (0, 0, pagewidth, pageheight)
