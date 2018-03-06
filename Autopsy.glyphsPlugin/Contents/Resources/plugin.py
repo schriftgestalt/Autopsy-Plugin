@@ -1,26 +1,19 @@
-#!/usr/bin/env python
 # encoding: utf-8
 
 import objc
-from GlyphsApp import *
-from GlyphsApp.plugins import *
 import sys, os, re
 
-import GlyphsApp
-
+from GlyphsApp import *
+from GlyphsApp.plugins import *
 
 GlyphsPluginProtocol = objc.protocolNamed( "GlyphsPlugin" )
 
-class GlyphsPluginAutopsy ( NSObject, GlyphsPluginProtocol ):
+class GlyphsPluginAutopsy (GeneralPlugin):
 	
 	_window = objc.IBOutlet()
 	_fontListController = objc.IBOutlet()
 	
 	def init( self ):
-		"""
-		You can add an observer like in the example.
-		Do all initializing here.
-		"""
 		try:
 			# Bundle = NSBundle.bundleForClass_( NSClassFromString( self.className() ) )
 			if not NSBundle.loadNibNamed_owner_( "AutopsyDialog", self ):
@@ -70,12 +63,6 @@ class GlyphsPluginAutopsy ( NSObject, GlyphsPluginProtocol ):
 		newMenuItem.setTarget_(self)
 		
 		mainMenu.itemAtIndex_(2).submenu().addItem_(newMenuItem)
-		
-	
-	def __del__( self ):
-		"""
-		Remove all observers you added in init().
-		"""
 	
 	def title( self ):
 		return "Autopsy"
@@ -85,14 +72,9 @@ class GlyphsPluginAutopsy ( NSObject, GlyphsPluginProtocol ):
 		Distinguishes the API version the plugin was built for. 
 		Return 1.
 		"""
-		try:
-			return 1
-		except Exception as e:
-			self.logToConsole( "interfaceVersion: %s" % str(e) )
+		return 1
 	
 	def showWindow(self):
-		#print "__window"
-		
 		self.glyphlist = []
 		Font = Glyphs.orderedDocuments()[0].font
 		if Font.selectedLayers is not None:
