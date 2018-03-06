@@ -43,7 +43,7 @@ __all__ = ["runAutopsy"]
 class Ddict(dict):
 	def __init__(self, default=None):
 		self.default = default
-	   
+	
 	def __getitem__(self, key):
 		if not self.has_key(key):
 			self[key] = self.default()
@@ -52,7 +52,7 @@ class Ddict(dict):
 ##### Settings
 
 programname = 'Autopsy'
-programversion = '1.3'
+programversion = '1.3.1'
 releasedate = '201604121821'
 verbose = False
 
