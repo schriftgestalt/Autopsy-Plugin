@@ -15,10 +15,7 @@ class GlyphsPluginAutopsy (GeneralPlugin):
 	
 	def init( self ):
 		try:
-			# Bundle = NSBundle.bundleForClass_( NSClassFromString( self.className() ) )
-			if not NSBundle.loadNibNamed_owner_( "AutopsyDialog", self ):
-				self.logToConsole( "Error loading .nib into Palette." )
-			print "__window", self._window
+			self.loadNib('AutopsyDialog', __file__)
 			defaultpdf = os.path.join(os.path.expanduser('~'), 'Desktop', 'Autopsy.pdf')
 			defaultpreferences = {
 				# 'com_yanone_Autopsy_PageOrientation_landscape' : 0,
