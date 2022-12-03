@@ -12,7 +12,8 @@ class GlyphsPluginAutopsy(GeneralPlugin):
 	_window = objc.IBOutlet()
 	_fontListController = objc.IBOutlet()
 
-	def init(self):
+	@objc.python_method
+	def settings(self):
 		try:
 			self.loadNib('AutopsyDialog', __file__)
 			defaultpdf = os.path.join(os.path.expanduser('~'), 'Desktop', 'Autopsy.pdf')
@@ -49,11 +50,10 @@ class GlyphsPluginAutopsy(GeneralPlugin):
 		except Exception as e:
 			self.logToConsole("init: %s" % str(e))
 
-		return self
+		#return self
 
-	def loadPlugin(self):
 		mainMenu = NSApplication.sharedApplication().mainMenu()
-		s = objc.selector(self.showWindow, signature='v@:')
+		s = objc.selector(self.showWindow, signature=b'v@:')
 		newMenuItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(self.title(), s, "y")
 		newMenuItem.setKeyEquivalentModifierMask_(NSAlternateKeyMask | NSCommandKeyMask)
 		newMenuItem.setTarget_(self)
@@ -82,7 +82,7 @@ class GlyphsPluginAutopsy(GeneralPlugin):
 
 	@objc.IBAction
 	def runAutopsy_(self, sender):
-		print "autopsy:"
+		print("autopsy:")
 		self._window.orderOut_(self)
 		#self.returnValue = NSOKButton
 		if self.mode == 'normal':
@@ -109,24 +109,9 @@ class GlyphsPluginAutopsy(GeneralPlugin):
 			runAutopsy(fonts, self.glyphlist)
 
 		except:
-			print traceback.format_exc()
+			print(traceback.format_exc())
 
 	@objc.IBAction
 	def closeDialog_(self, sender):
 		self._window.orderOut_(self)
 
-	@objc.IBAction
-	def browseFile(self, sender):
-		Directory = NSUserDefaults.standardUserDefaults()["com_yanone_Autopsy_filename"]
-		FileName = os.path.basename(Directory)
-		file = putFile('', title='pdf', directory=Directory, fileName=FileName, fileTypes=['pdf'])
-		if file:
-			NSUserDefaults.standardUserDefaults()["com_yanone_Autopsy_filename"] = file
-
-	def logToConsole(self, message):
-		"""
-		The variable 'message' will be passed to Console.app.
-		Use self.logToConsole( "bla bla" ) for debugging.
-		"""
-		myLog = "%s:\n%s" % (self.__class__.__name__, message)
-		NSLog(myLog)

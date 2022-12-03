@@ -40,7 +40,7 @@ class Ddict(dict):
 		self.default = default
 
 	def __getitem__(self, key):
-		if not self.has_key(key):
+		if key not in self:
 			self[key] = self.default()
 		return dict.__getitem__(self, key)
 
@@ -229,7 +229,7 @@ class Report:
 				try:
 					position += self.values[i + 1][1] / mm * ratio
 				except:
-					# print traceback.format_exc()
+					# print(traceback.format_exc())
 					pass
 
 		# Calculate thickness of stroke according to scope of graph
@@ -383,7 +383,7 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokecolour, strokewidth, dashed):
 	if not PSCommands:
 		layer = glyph.layers[0]
-		p = layer.drawBezierPath
+		p = layer.completeBezierPath
 		transform = NSAffineTransform.new()
 		transform.translateXBy_yBy_(xoffset * mm, yoffset * mm)
 		transform.scaleBy_(ratio)
@@ -402,13 +402,13 @@ def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokec
 				x = xoffset * mm + command[1][0] * ratio
 				y = yoffset * mm + command[1][1] * ratio
 				p.moveToPoint_((x, y))
-				#print "('moveTo', (%s, %s))," % (command[1][0], command[1][1])
+				#print("('moveTo', (%s, %s))," % (command[1][0], command[1][1]))
 
 			if command[0] == 'lineTo':
 				x = xoffset * mm + command[1][0] * ratio
 				y = yoffset * mm + command[1][1] * ratio
 				p.lineToPoint_((x, y))
-				#print "('lineTo', (%s, %s))," % (command[1][0], command[1][1])
+				#print("('lineTo', (%s, %s))," % (command[1][0], command[1][1]))
 
 			if command[0] == 'curveTo':
 
@@ -526,7 +526,7 @@ def drawTitlePage(fonts):
 		glyphfound = False
 
 		randomfont = fonts[random.randint(0, len(fonts) - 1)]
-		randomglyphindex = random.randint(0, len(randomfont) - 1)
+		randomglyphindex = random.randint(0, len(randomfont.glyphs) - 1)
 		g = randomfont.glyphs[randomglyphindex]
 
 		if g is not None:
@@ -552,7 +552,7 @@ def drawTitlePage(fonts):
 		if bbox.size.height > 1:
 			localratio = .65 / bbox.size.height * (pageheight - yoffset)
 		else:
-			print "____NO height____"
+			print("____NO height____")
 			localratio = .65 / 300
 
 		# draw logo and name
@@ -620,8 +620,8 @@ def drawTitlePage(fonts):
 			yoffset -= line[4] * linesratio
 			DrawText(line[0], line[1] * linesratio, line[2], line[3], yoffset, line[5])
 	except:
-		print "Problem with titlepage",
-		print traceback.format_exc()
+		print("Problem with titlepage")
+		print(traceback.format_exc())
 
 def drawGlyph(fonts, glyphName, i, ratio, reports):
 	output('-- ' + glyphName + ' --')
@@ -641,7 +641,7 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 		unicodes = 'u' + string.join(map(unicode2hex, fonts[0].glyphs[glyphName].unicodes), "u u") + 'u'
 	except:
 		unicodes = ''
-	# print '-', fonts[0][glyphindex], '-'
+	# print('-', fonts[0][glyphindex], '-')
 	DrawHeadlineIntoPage("/%s/ #%d# %s" % (glyphName, i, unicodes))
 
 	# Initial offset
@@ -660,9 +660,9 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 
 	for i_f, font in enumerate(fonts):
 
-		if font.glyphs.has_key(glyphName):
+		if glyphName in font.glyphs:
 			g = font.glyphs[glyphName]
-		elif not font.glyphs.has_key(glyphName) and fonts[i_f - 1].glyphs.has_key(glyphName):
+		elif glyphName in fonts[i_f - 1].glyphs:
 			g = fonts[i_f - 1].glyphs[glyphName]
 
 		DrawMetrics(font, g, xoffset, yoffset, ratio)
@@ -689,7 +689,7 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 	for i_f, font in enumerate(fonts):
 
 		# Glyph is in font
-		if font.glyphs.has_key(glyphName):
+		if glyphName in font.glyphs:
 			g = font.glyphs[glyphName]
 
 			if Glyphs.intDefaults["Autopsy.OutlineStyle"] == 0:
@@ -704,7 +704,7 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 				myglyphdashed = None
 
 		# Glyph is missing in font, draw replacement glyph
-		elif not font.glyphs.has_key(glyphName) and fonts[i_f - 1].glyphs.has_key(glyphName):
+		elif glyphName in fonts[i_f - 1].glyphs:
 			g = fonts[i_f - 1].glyphs[glyphName]
 			myglyphfillcolour = None
 			myglyphstrokecolour = glyphcolour
@@ -735,7 +735,7 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 
 			reports[glyphName][table].scope = Glyphs.defaults["com_yanone_Autopsy_graph_" + table + '_scope']
 
-			if graphcolour.has_key(table):
+			if table in graphcolour:
 				reports[glyphName][table].strokecolour = graphcolour[table]
 			else:
 				reports[glyphName][table].strokecolour = graphcolour['__default__']
@@ -823,9 +823,9 @@ def runAutopsy(fonts, glyphNames):
 			reports[glyphName]['rightsidebearing'] = Report()
 			for font in fonts:
 				FontMaster = font.masters[0]
-				if font.glyphs.has_key(glyphName):
+				if glyphName in font.glyphs:
 					g = font.glyphs[glyphName].layers[FontMaster.id]
-					#print "__g", g
+					#print("__g", g)
 					glyphwidth[glyphName] = g.width
 					height = ascender(font) - descender(font)
 
@@ -941,8 +941,8 @@ def runAutopsy(fonts, glyphNames):
 				CGPDFContextEndPage(pdfContext)
 
 		except:
-			print "__Main"
-			print traceback.format_exc()
+			print("__Main")
+			print(traceback.format_exc())
 
 		finally:
 			# close PDF
@@ -952,9 +952,9 @@ def runAutopsy(fonts, glyphNames):
 		output("time: " + str(time.time() - starttime) + "sec, ca." + str((time.time() - starttime) / len(glyphNames)) + "sec per glyph")
 
 		if errors:
-			print "__Errors", errors
+			print("__Errors", errors)
 			for error in errortexts:
-				#print "__Message", error, programname
+				#print("__Message", error, programname)
 				dlg = message(error)
 
 		# if not errors and fonts and myDialog.openPDF:
@@ -976,7 +976,7 @@ def launchfile(path):
 # Output to console
 def output(text):
 	if verbose:
-		print "> " + str(text) + " <"
+		print("> " + str(text) + " <")
 
 '''
 
