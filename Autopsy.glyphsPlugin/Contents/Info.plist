@@ -3,9 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleDisplayName</key>
-	<string>Autopsy</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>plugin</string>
 	<key>CFBundleIdentifier</key>
@@ -14,19 +12,17 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Autopsy</string>
-	<key>CFBundlePackageType</key>
-	<string>BNDL</string>
-	<key>CFBundleVersion</key>
-	<string>2</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.3.1</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright, Yanone, 2018</string>
+	<string>Copyright, Yanone, 2022</string>
 	<key>NSPrincipalClass</key>
 	<string>GlyphsPluginAutopsy</string>
 	<key>PyMainFileNames</key>
 	<array>
-		<string>../MacOS/main.py</string>
+		<string>plugin.py</string>
 	</array>
 </dict>
 </plist>
