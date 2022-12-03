@@ -1,8 +1,6 @@
 #MenuTitle: Autopsy 1.3
 # encoding: utf-8
 
-
-
 ########################################################################
 #
 #   Autopsy Visual Font Auditing
@@ -19,17 +17,13 @@
 #
 ########################################################################
 
-
 from GlyphsApp import *
 from Foundation import NSURL, NSAffineTransform, NSMakeRect, NSTemporaryDirectory
 from AppKit import NSFont, NSColor, NSAttributedString, NSBezierPath, NSGraphicsContext, NSFontAttributeName, NSForegroundColorAttributeName
 import time, os, string, math, random
 import traceback
 from Quartz.CoreGraphics import CGRectMake, CGPDFContextCreateWithURL, CGPDFContextBeginPage, CGPDFContextEndPage, CGPDFContextClose
-
-
-
-cm = 72/2.54
+cm = 72 / 2.54
 mm = cm / 10
 A4 = (595.276, 841.89)
 letter = (612, 792)
@@ -41,9 +35,10 @@ __all__ = ["runAutopsy"]
 ##### Misc.
 
 class Ddict(dict):
+
 	def __init__(self, default=None):
 		self.default = default
-	
+
 	def __getitem__(self, key):
 		if not self.has_key(key):
 			self[key] = self.default()
@@ -59,15 +54,14 @@ verbose = False
 availablegraphs = ('width', 'bboxwidth', 'bboxheight', 'highestpoint', 'lowestpoint', 'leftsidebearing', 'rightsidebearing')
 
 graphrealnames = {
-	'width' : 'Width',
-	'bboxwidth' : 'BBox Width',
-	'bboxheight' : 'BBox Height',
-	'highestpoint' : 'BBox Highest',
-	'lowestpoint' : 'BBox Lowest',
-	'leftsidebearing' : 'L Sidebearing',
-	'rightsidebearing' : 'R Sidebearing',
+	'width': 'Width',
+	'bboxwidth': 'BBox Width',
+	'bboxheight': 'BBox Height',
+	'highestpoint': 'BBox Highest',
+	'lowestpoint': 'BBox Lowest',
+	'leftsidebearing': 'L Sidebearing',
+	'rightsidebearing': 'R Sidebearing',
 	}
-
 
 pagemargin = Ddict(dict)
 pagemargin['left'] = 12
@@ -96,11 +90,9 @@ pdfcolour = (.25, 0, 1, 0)
 #headlinefontcolour = (.25, .25, 1, .8)
 headlinefontcolour = (0, 0, 0, 1)
 
-
 pdffont = Ddict(dict)
 pdffont['Regular'] = 'Courier'
 pdffont['Bold'] = 'Courier-Bold'
-
 
 graphcolour = Ddict(dict)
 graphcolour['__default__'] = pdfcolour
@@ -120,18 +112,16 @@ metricslinewidth = .5 # pt
 scrapboardcolour = (0, 0, 0, 1)
 drawboards = False
 
-
 # Graphs
 #tablenamefont = pdffont['Regular']
 graphnamefontsize = 8
 #pointsvaluefont = pdffont['Regular']
 pointsvaluefontsize = 8
 
-
 ############ Classes
 
-
 class Report:
+
 	def __init__(self):
 		self.gridcolour = metricscolour
 		self.strokecolour = pdfcolour
@@ -139,10 +129,10 @@ class Report:
 		self.strokewidth = 1
 		self.values = [] # (value, glyphwidth, glyphheight)
 		self.pointslist = []
-#		self.scope = 'local' # local or global (relative to this single glyph, or to all glyphs in the pdf)
+		# self.scope = 'local' # local or global (relative to this single glyph, or to all glyphs in the pdf)
 		self.glyphname = ''
 		self.graphname = ''
-		
+
 		self.min = 0
 		self.max = 0
 		self.sum = 0
@@ -150,11 +140,11 @@ class Report:
 
 	def addvalue(self, value):
 		self.values.append(value)
-		
+
 		if len(self.values) == 1:
 			self.min = value[0]
 			self.max = value[0]
-		
+
 		if value[0] > self.max:
 			self.max = value[0]
 		if value[0] < self.min:
@@ -165,43 +155,41 @@ class Report:
 		global myDialog
 		global globalscopemin, globalscopemax
 		global glyphs
-		
+
 		drawrect(self.left * mm, self.bottom * mm, self.right * mm, self.top * mm, '', self.gridcolour, self.gridwidth, None, roundedcorners)
-		
+
 		r = .05
 		mymin = self.min - int(math.fabs(self.min) * r)
 		mymax = self.max + int(math.fabs(self.max) * r)
-		
-		
+
 		if self.scope == 'global':
-			
+
 			# Walk through the other graphs and collect their min and max values
 			for glyph in glyphs:
-				
+
 				try:
 					if reports[glyphName][self.graphname].min < mymin:
 						mymin = reports[glyphName][self.graphname].min
 				except:
 					mymin = reports[glyphName][self.graphname].min
-				
+
 				try:
 					if reports[glyphName][self.graphname].max > mymax:
 						mymax = reports[glyphName][self.graphname].max
 				except:
 					mymax = reports[glyphName][self.graphname].max
-				
+
 		if mymax - mymin < 10:
 			mymin -= 5
 			mymax += 5
-		
+
 		pointslist = []
-		
-		
+
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
 			if Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]:
-				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.left * mm + 1*mm, self.bottom * mm - 3*mm, str(int(mymin)))
-				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm - 5*mm, self.bottom * mm - 3*mm, str(int(mymax)))
-			
+				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.left * mm + 1 * mm, self.bottom * mm - 3 * mm, str(int(mymin)))
+				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm - 5 * mm, self.bottom * mm - 3 * mm, str(int(mymax)))
+
 			try:
 				localratio = (self.right - self.left) / (mymax - mymin)
 			except:
@@ -215,21 +203,21 @@ class Report:
 				x = self.left + (value[0] - mymin) * localratio
 				pointslist.append((value[0], x, y))
 				try:
-					y -= self.values[i+1][2] / mm * ratio
+					y -= self.values[i + 1][2] / mm * ratio
 				except:
 					pass
-			
+
 		else:
 			if Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]:
-				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm + 1*mm, self.bottom * mm + 1*mm, str(int(mymin)))
-				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm + 1*mm, self.top * mm - 3*mm, str(int(mymax)))
-#			DrawText(pdffont['Regular'], graphnamefontsize, self.gridcolour, self.left * mm + 1.7*mm, self.top * mm - 4*mm, graphrealnames[self.graphname])
-			
+				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm + 1 * mm, self.bottom * mm + 1 * mm, str(int(mymin)))
+				DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, self.right * mm + 1 * mm, self.top * mm - 3 * mm, str(int(mymax)))
+			# DrawText(pdffont['Regular'], graphnamefontsize, self.gridcolour, self.left * mm + 1.7*mm, self.top * mm - 4*mm, graphrealnames[self.graphname])
+
 			try:
 				localratio = (self.top - self.bottom) / (mymax - mymin)
 			except:
 				localratio = 0
-			
+
 			try:
 				position = self.left + (self.values[0][1] / 2 / mm * ratio)
 			except:
@@ -239,11 +227,11 @@ class Report:
 				y = self.bottom + (value[0] - mymin) * localratio
 				pointslist.append((value[0], x, y))
 				try:
-					position += self.values[i+1][1] / mm * ratio
+					position += self.values[i + 1][1] / mm * ratio
 				except:
 					# print traceback.format_exc()
 					pass
-		
+
 		# Calculate thickness of stroke according to scope of graph
 		minthickness = 6
 		maxthickness = 12
@@ -252,10 +240,9 @@ class Report:
 			thickness = minthickness
 		elif thickness > maxthickness:
 			thickness = maxthickness
-		
-		DrawTableLines(pointslist, self.strokecolour, thickness)
-		DrawText(pdffont['Regular'], graphnamefontsize, self.gridcolour, self.left * mm + 1.7*mm, self.top * mm - 4*mm, graphrealnames[self.graphname])
 
+		DrawTableLines(pointslist, self.strokecolour, thickness)
+		DrawText(pdffont['Regular'], graphnamefontsize, self.gridcolour, self.left * mm + 1.7 * mm, self.top * mm - 4 * mm, graphrealnames[self.graphname])
 
 #################################
 
@@ -264,79 +251,79 @@ def SetScrapBoard(pageratio):
 	global scrapboard
 	global graphcoords
 	scrapboard['left'] = pagemargin['left']
-	scrapboard['right'] = pagewidth/mm - pagemargin['right']
-	scrapboard['top'] = pageheight/mm - pagemargin['top'] - headmargin
+	scrapboard['right'] = pagewidth / mm - pagemargin['right']
+	scrapboard['top'] = pageheight / mm - pagemargin['top'] - headmargin
 	scrapboard['bottom'] = pagemargin['bottom']
 	graphcoords['left'] = pagemargin['left']
-	graphcoords['right'] = pagewidth/mm - pagemargin['right']
-	graphcoords['top'] = pageheight/mm - pagemargin['top'] - headmargin
+	graphcoords['right'] = pagewidth / mm - pagemargin['right']
+	graphcoords['top'] = pageheight / mm - pagemargin['top'] - headmargin
 	graphcoords['bottom'] = pagemargin['bottom']
 
 	# Recalculate drawing boards
 	if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
-		availablewidth = pagewidth/mm - pagemargin['left'] - pagemargin['right']
+		availablewidth = pagewidth / mm - pagemargin['left'] - pagemargin['right']
 		partial = availablewidth * pageratio
 		scrapboard['right'] = pagemargin['left'] + partial - separator / 2
 		graphcoords['left'] = scrapboard['right'] + separator
 	else:
-		availablewidth = pageheight/mm - pagemargin['top'] - pagemargin['bottom'] - headmargin
+		availablewidth = pageheight / mm - pagemargin['top'] - pagemargin['bottom'] - headmargin
 		partial = availablewidth * pageratio
-		scrapboard['bottom'] = pageheight/mm - headmargin - partial + separator / 2
-		graphcoords['top'] = scrapboard['bottom'] - separator 
-
-
+		scrapboard['bottom'] = pageheight / mm - headmargin - partial + separator / 2
+		graphcoords['top'] = scrapboard['bottom'] - separator
 
 ##################################################################
 #
 #   PDF section
 #
 
-
 def DrawText(font, fontsize, fontcolour, x, y, text):
-	attributes = {NSFontAttributeName : NSFont.fontWithName_size_(font, fontsize), NSForegroundColorAttributeName: NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(fontcolour[0], fontcolour[1], fontcolour[2], fontcolour[3], 1)}
+	attributes = {
+		NSFontAttributeName: NSFont.fontWithName_size_(font, fontsize),
+		NSForegroundColorAttributeName: NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(fontcolour[0], fontcolour[1], fontcolour[2], fontcolour[3], 1)
+		}
 	String = NSAttributedString.alloc().initWithString_attributes_(text, attributes)
 	String.drawAtPoint_((x, y))
 
 def DrawTableLines(list, colour, thickness):
-	
+
 	global myDialog
 	for i, point in enumerate(list):
 
 		try:
-			drawline(list[i][1]*mm, list[i][2]*mm, list[i+1][1]*mm, list[i+1][2]*mm, colour, thickness, None)
+			drawline(list[i][1] * mm, list[i][2] * mm, list[i + 1][1] * mm, list[i + 1][2] * mm, colour, thickness, None)
 		except:
 			pass
 
 		NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(colour[0], colour[1], colour[2], colour[3], 1).set()
-		Rect = NSMakeRect(point[1]*mm-(thickness), point[2]*mm-(thickness), thickness*2, thickness*2)
+		Rect = NSMakeRect(point[1] * mm - (thickness), point[2] * mm - (thickness), thickness * 2, thickness * 2)
 		NSBezierPath.bezierPathWithOvalInRect_(Rect).fill()
 		if Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]:
-			DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, point[1]*mm + (thickness/6+1)*mm, point[2]*mm - (thickness/6+2.5)*mm, str(int(round(point[0]))))
+			DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, point[1] * mm + (thickness / 6 + 1) * mm, point[2] * mm - (thickness / 6 + 2.5) * mm, str(int(round(point[0]))))
 
 def DrawHeadlineIntoPage(text):
 
-	drawrect(pagemargin['left']*mm, pageheight - pagemargin['top']*mm - headerheight*mm, pagewidth - pagemargin['right']*mm, pageheight - pagemargin['top']*mm, pdfcolour, None, 0, None, roundedcorners)
-	DrawText(pdffont['Bold'], headlinefontsize, headlinefontcolour, 2*mm + pagemargin['left']*mm, 2.2*mm + pageheight - pagemargin['top']*mm - headerheight*mm, text)
+	drawrect(pagemargin['left'] * mm, pageheight - pagemargin['top'] * mm - headerheight * mm, pagewidth - pagemargin['right'] * mm, pageheight - pagemargin['top'] * mm, pdfcolour, None, 0, None, roundedcorners)
+	DrawText(pdffont['Bold'], headlinefontsize, headlinefontcolour, 2 * mm + pagemargin['left'] * mm, 2.2 * mm + pageheight - pagemargin['top'] * mm - headerheight * mm, text)
 
 def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 	global myDialog
 	g = glyph.layers[0]
-	
+
 	mywidth = g.width
 	if mywidth == 0:
 		mywidth = g.bounds.size.width
-		
+
 	# Draw metrics
 	if Glyphs.defaults["com_yanone_Autopsy_drawmetrics"] == 1:
 		# Versalhöhe
-		drawline(xoffset*mm, yoffset*mm + capheight(f) * ratio, xoffset*mm + mywidth*ratio, yoffset*mm + capheight(f) * ratio, metricscolour, metricslinewidth, None)
+		drawline(xoffset * mm, yoffset * mm + capheight(f) * ratio, xoffset * mm + mywidth * ratio, yoffset * mm + capheight(f) * ratio, metricscolour, metricslinewidth, None)
 		# x-Höhe
-		drawline(xoffset*mm, yoffset*mm + xheight(f) * ratio,   xoffset*mm + mywidth*ratio, yoffset*mm + xheight(f) * ratio, metricscolour, metricslinewidth, None)
+		drawline(xoffset * mm, yoffset * mm + xheight(f) * ratio,   xoffset * mm + mywidth * ratio, yoffset * mm + xheight(f) * ratio, metricscolour, metricslinewidth, None)
 		# Grundlinie
-		drawline(xoffset*mm, yoffset*mm,                        xoffset*mm + mywidth*ratio, yoffset*mm, metricscolour, metricslinewidth, None)
+		drawline(xoffset * mm, yoffset * mm,                        xoffset * mm + mywidth * ratio, yoffset * mm, metricscolour, metricslinewidth, None)
 
 		# Bounding Box
-		drawrect(xoffset*mm, yoffset*mm + descender(f)*ratio,   xoffset*mm + mywidth*ratio, yoffset*mm + ascender(f)*ratio, '', metricscolour, metricslinewidth, None, 0)
+		drawrect(xoffset * mm, yoffset * mm + descender(f) * ratio, xoffset * mm + mywidth * ratio, yoffset * mm + ascender(f) * ratio, '', metricscolour, metricslinewidth, None, 0)
 
 	# Draw guidelines
 	if Glyphs.boolDefaults["com_yanone_Autopsy_drawguidelines"] == 1 and False: #GSNotImplemented
@@ -351,7 +338,7 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 			y1 = (0 - descender(f)) / mm * ratio
 			x2 = (guide.position + a) / mm * ratio
 			y2 = (ascender(f) - descender(f)) / mm * ratio
-			drawline(xoffset*mm + x1*mm, yoffset*mm + y1*mm, xoffset*mm + x2*mm, yoffset*mm + y2*mm, colourguides, metricslinewidth, guidelinedashed)
+			drawline(xoffset * mm + x1 * mm, yoffset * mm + y1 * mm, xoffset * mm + x2 * mm, yoffset * mm + y2 * mm, colourguides, metricslinewidth, guidelinedashed)
 
 		# Global vertical guides
 		for guide in f.vguides:
@@ -363,7 +350,7 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 			y1 = (0 - descender(f)) / mm * ratio
 			x2 = (guide.position + a) / mm * ratio
 			y2 = (ascender(f) - descender(f)) / mm * ratio
-			drawline(xoffset*mm + x1*mm, yoffset*mm + y1*mm, xoffset*mm + x2*mm, yoffset*mm + y2*mm, colourglobalguides, metricslinewidth, guidelinedashed)
+			drawline(xoffset * mm + x1 * mm, yoffset * mm + y1 * mm, xoffset * mm + x2 * mm, yoffset * mm + y2 * mm, colourglobalguides, metricslinewidth, guidelinedashed)
 
 		# Local horizontal guides
 		for guide in g.hguides:
@@ -375,7 +362,7 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 			y1 = (guide.position - descender(f)) / mm * ratio
 			x2 = g.width / mm * ratio
 			y2 = (guide.position - descender(f) + a) / mm * ratio
-			drawline(xoffset*mm + x1*mm, yoffset*mm + y1*mm, xoffset*mm + x2*mm, yoffset*mm + y2*mm, colourguides, metricslinewidth, guidelinedashed)
+			drawline(xoffset * mm + x1 * mm, yoffset * mm + y1 * mm, xoffset * mm + x2 * mm, yoffset * mm + y2 * mm, colourguides, metricslinewidth, guidelinedashed)
 
 		# Global horizontal guides
 		for guide in f.hguides:
@@ -387,52 +374,52 @@ def DrawMetrics(f, glyph, xoffset, yoffset, ratio):
 			y1 = (guide.position - descender(f)) / mm * ratio
 			x2 = g.width / mm * ratio
 			y2 = (guide.position - descender(f) + a) / mm * ratio
-			drawline(xoffset*mm + x1*mm, yoffset*mm + y1*mm, xoffset*mm + x2*mm, yoffset*mm + y2*mm, colourglobalguides, metricslinewidth, guidelinedashed)
+			drawline(xoffset * mm + x1 * mm, yoffset * mm + y1 * mm, xoffset * mm + x2 * mm, yoffset * mm + y2 * mm, colourglobalguides, metricslinewidth, guidelinedashed)
 
 	# Draw font names under box
 	if Glyphs.boolDefaults["com_yanone_Autopsy_fontnamesunderglyph"]:
-		DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, xoffset*mm + 2, yoffset*mm - 8, f.familyName)
+		DrawText(pdffont['Regular'], pointsvaluefontsize, glyphcolour, xoffset * mm + 2, yoffset * mm - 8, f.familyName)
 
 def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokecolour, strokewidth, dashed):
 	if not PSCommands:
 		layer = glyph.layers[0]
 		p = layer.drawBezierPath
 		transform = NSAffineTransform.new()
-		transform.translateXBy_yBy_(xoffset*mm, yoffset*mm)
+		transform.translateXBy_yBy_(xoffset * mm, yoffset * mm)
 		transform.scaleBy_(ratio)
 		p.transformUsingAffineTransform_(transform)
 	else:
 		p = NSBezierPath.bezierPath()
-		
+
 		for command in PSCommands:
-		
+
 			if command[0] == 'moveTo':
 				try:
 					p.close()
 				except:
 					pass
-	
-				x = xoffset*mm + command[1][0] * ratio
-				y = yoffset*mm + command[1][1] * ratio
+
+				x = xoffset * mm + command[1][0] * ratio
+				y = yoffset * mm + command[1][1] * ratio
 				p.moveToPoint_((x, y))
 				#print "('moveTo', (%s, %s))," % (command[1][0], command[1][1])
-	
+
 			if command[0] == 'lineTo':
-				x = xoffset*mm + command[1][0] * ratio
-				y = yoffset*mm + command[1][1] * ratio
+				x = xoffset * mm + command[1][0] * ratio
+				y = yoffset * mm + command[1][1] * ratio
 				p.lineToPoint_((x, y))
 				#print "('lineTo', (%s, %s))," % (command[1][0], command[1][1])
-	
+
 			if command[0] == 'curveTo':
-	
+
 				points = []
-				
+
 				for point in command[1:]:
-					points.append( (xoffset*mm + point[0] * ratio, yoffset*mm + point[1] * ratio) )
-				
+					points.append((xoffset * mm + point[0] * ratio, yoffset * mm + point[1] * ratio))
+
 				p.curveToPoint_controlPoint1_controlPoint2_(points[0], points[1], points[2])
 		p.closePath()
-	
+
 	if fillcolour:
 		NSColor.colorWithDeviceCyan_magenta_yellow_black_alpha_(fillcolour[0], fillcolour[1], fillcolour[2], fillcolour[3], 1).set()
 		p.fill()
@@ -443,9 +430,6 @@ def DrawGlyph(f, glyph, PSCommands, xoffset, yoffset, ratio, fillcolour, strokec
 		p.setLineWidth_(strokewidth)
 		p.stroke()
 
-
-
-
 ######### draw primitives
 
 def drawline(x1, y1, x2, y2, colour, strokewidth, dashed):
@@ -455,7 +439,7 @@ def drawline(x1, y1, x2, y2, colour, strokewidth, dashed):
 	Path.moveToPoint_((x1, y1))
 	Path.lineToPoint_((x2, y2))
 	Path.setLineWidth_(strokewidth)
-	
+
 	if dashed:
 		Path.setLineDash_count_phase_(dashed, 2, 0.0)
 	Path.stroke()
@@ -476,13 +460,13 @@ def drawrect(x1, y1, x2, y2, fillcolour, strokecolour, strokewidth, dashed, roun
 # collects the glyphs that should be displayed
 # and returns list of glyph names
 def collectglyphnames():
-	
+
 	glyphlist = []
 	Font = Glyphs.orderedDocuments()[0].font
 	if Font.selectedLayers is not None:
 		for Layer in Font.selectedLayers:
 			glyphlist.append(Layer.parent.name)
-	
+
 	return glyphlist
 
 def capheight(f):
@@ -511,7 +495,6 @@ def raiseerror(text):
 	except:
 		errors = 1
 
-
 def CheckForUpdates():
 	return
 	if Defaults['com_yanone_Autopsy_checkforupdates']:
@@ -528,16 +511,16 @@ def CheckForUpdates():
 
 def drawTitlePage(fonts):
 	try:
-		xoffset = pagewidth/mm * 1/1.61
-		yoffset = pageheight/mm * 1.61
-		
+		xoffset = pagewidth / mm * 1 / 1.61
+		yoffset = pageheight / mm * 1.61
+
 		#NSRectFill(((-100, -100), (200, 200)))
-	
+
 		# Draw front page
 		output('-- font page --')
-	
-		drawrect(3*mm, 3*mm, pagewidth - 3*mm, pageheight - 3*mm, pdfcolour, None, None, None, 0)
-		
+
+		drawrect(3 * mm, 3 * mm, pagewidth - 3 * mm, pageheight - 3 * mm, pdfcolour, None, None, None, 0)
+
 		# Try to get a random glyph from a random font with nodes
 		# try not more than 10000 times
 		glyphfound = False
@@ -545,7 +528,7 @@ def drawTitlePage(fonts):
 		randomfont = fonts[random.randint(0, len(fonts) - 1)]
 		randomglyphindex = random.randint(0, len(randomfont) - 1)
 		g = randomfont.glyphs[randomglyphindex]
-		
+
 		if g is not None:
 			glyphfound = True
 		tries = 0
@@ -558,21 +541,20 @@ def drawTitlePage(fonts):
 			tries += 1
 		# if (g.nodes or g.components):
 		# 	glyphfound = True
-	
+
 		# if random didn't help, get first glyph with nodes
 		if not glyphfound:
 			for gi in range(len(fonts[0])):
 				if fonts[0][gi].nodes_number or fonts[0][gi].components:
 					g = fonts[0][gi]
-		
-	
+
 		bbox = g.layers[0].bounds
 		if bbox.size.height > 1:
 			localratio = .65 / bbox.size.height * (pageheight - yoffset)
 		else:
 			print "____NO height____"
 			localratio = .65 / 300
-		
+
 		# draw logo and name
 		logoyoffset = -5
 
@@ -581,15 +563,15 @@ def drawTitlePage(fonts):
 		ynlogoring = [('moveTo', (350, 700)), ['curveTo', (0, 350), (138, 700), (0, 562)], ['curveTo', (350, 0), (0, 138), (138, 0)], ['curveTo', (700, 350), (562, 0), (700, 138)], ['curveTo', (350, 700), (700, 562), (562, 700)]]
 		textyoffset = 0
 		textxoffset = 0
-	
-		DrawGlyph(None, None, ynlogo, xoffset/mm - .5, 14.5 + logoyoffset, .05, headlinefontcolour, None, None, 1)
-	
-		DrawGlyph(None, None, ynlogoring, xoffset/mm - .5, 14.5 + logoyoffset, .05, None, (0,0,0,0), 3, (6,4))
-		DrawText(pdffont['Regular'], 9, headlinefontcolour, textxoffset + xoffset + 15*mm, 22*mm + textyoffset + logoyoffset*mm, programname + ' ' + programversion + ' by Yanone')
-		DrawText(pdffont['Regular'], 9, headlinefontcolour, textxoffset + xoffset + 15*mm, 18.4*mm + textyoffset + logoyoffset*mm, 'www.yanone.de/typedesign/autopsy/')
-	
+
+		DrawGlyph(None, None, ynlogo, xoffset / mm - .5, 14.5 + logoyoffset, .05, headlinefontcolour, None, None, 1)
+
+		DrawGlyph(None, None, ynlogoring, xoffset / mm - .5, 14.5 + logoyoffset, .05, None, (0, 0, 0, 0), 3, (6, 4))
+		DrawText(pdffont['Regular'], 9, headlinefontcolour, textxoffset + xoffset + 15 * mm, 22 * mm + textyoffset + logoyoffset * mm, programname + ' ' + programversion + ' by Yanone')
+		DrawText(pdffont['Regular'], 9, headlinefontcolour, textxoffset + xoffset + 15 * mm, 18.4 * mm + textyoffset + logoyoffset * mm, 'www.yanone.de/typedesign/autopsy/')
+
 		# Sample glyph
-		DrawGlyph(fonts[0], g, None, xoffset/mm - bbox.origin.x/mm*localratio, yoffset/mm - bbox.origin.y/mm*localratio + 18, localratio, (0,0,0,0), headlinefontcolour, 3, (6, 4))
+		DrawGlyph(fonts[0], g, None, xoffset / mm - bbox.origin.x / mm * localratio, yoffset / mm - bbox.origin.y / mm * localratio + 18, localratio, (0, 0, 0, 0), headlinefontcolour, 3, (6, 4))
 
 		# Autopsy Report
 		DrawText(pdffont['Bold'], 48, headlinefontcolour, xoffset, yoffset, "Autopsy Report")
@@ -625,13 +607,13 @@ def drawTitlePage(fonts):
 		else:
 			doctor = 'Doctor'
 		fontinfos = {
-			doctor : ", ".join(designers),
-			'Time' : time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()),
-		}
+			doctor: ", ".join(designers),
+			'Time': time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()),
+			}
 		for fontinfo in fontinfos:
 			lines.append((pdffont['Regular'], 18, headlinefontcolour, xoffset, 30, fontinfo + ':'))
 			lines.append((pdffont['Bold'], 18, headlinefontcolour, xoffset, 20, fontinfos[fontinfo]))
-		linesratio = 1.0/len(lines) * textmaxratio / pageheight/mm * 1.61
+		linesratio = 1.0 / len(lines) * textmaxratio / pageheight / mm * 1.61
 		if linesratio > 1:
 			linesratio = 1
 		for line in lines:
@@ -640,7 +622,6 @@ def drawTitlePage(fonts):
 	except:
 		print "Problem with titlepage",
 		print traceback.format_exc()
-		
 
 def drawGlyph(fonts, glyphName, i, ratio, reports):
 	output('-- ' + glyphName + ' --')
@@ -675,16 +656,15 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 	# Draw Metrics
 
 	xoffset = xoffsetinitial
-	yoffset = yoffsetinitial - descender(fonts[0])*ratio/mm
-
+	yoffset = yoffsetinitial - descender(fonts[0]) * ratio / mm
 
 	for i_f, font in enumerate(fonts):
 
 		if font.glyphs.has_key(glyphName):
 			g = font.glyphs[glyphName]
-		elif not font.glyphs.has_key(glyphName) and fonts[i_f-1].glyphs.has_key(glyphName):
-			g = fonts[i_f-1].glyphs[glyphName]
-		
+		elif not font.glyphs.has_key(glyphName) and fonts[i_f - 1].glyphs.has_key(glyphName):
+			g = fonts[i_f - 1].glyphs[glyphName]
+
 		DrawMetrics(font, g, xoffset, yoffset, ratio)
 
 		# increase offset
@@ -695,23 +675,23 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 				xoffset += g.layers[0].bounds.size.width / mm * ratio
 			else:
 				xoffset += g.layers[0].width / mm * ratio
-	
+
 	# Draw Glyphs
-	
+
 	xoffset = xoffsetinitial
-	yoffset = yoffsetinitial - descender(fonts[0])*ratio/mm
+	yoffset = yoffsetinitial - descender(fonts[0]) * ratio / mm
 	# Defaults
 	myglyphfillcolour = glyphcolour
 	myglyphstrokecolour = None
 	myglyphstrokewidth = 0
 	myglyphdashed = None
-	
+
 	for i_f, font in enumerate(fonts):
-		
+
 		# Glyph is in font
 		if font.glyphs.has_key(glyphName):
 			g = font.glyphs[glyphName]
-			
+
 			if Glyphs.intDefaults["Autopsy.OutlineStyle"] == 0:
 				myglyphfillcolour = glyphcolour
 				myglyphstrokecolour = None
@@ -722,17 +702,17 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 				myglyphstrokecolour = glyphcolour
 				myglyphstrokewidth = 1.5
 				myglyphdashed = None
-		
+
 		# Glyph is missing in font, draw replacement glyph
-		elif not font.glyphs.has_key(glyphName) and fonts[i_f-1].glyphs.has_key(glyphName):
-			g = fonts[i_f-1].glyphs[glyphName]
+		elif not font.glyphs.has_key(glyphName) and fonts[i_f - 1].glyphs.has_key(glyphName):
+			g = fonts[i_f - 1].glyphs[glyphName]
 			myglyphfillcolour = None
 			myglyphstrokecolour = glyphcolour
 			myglyphstrokewidth = 1
 			myglyphdashed = (3, 3)
-		
+
 		DrawGlyph(font, g, None, xoffset, yoffset, ratio, myglyphfillcolour, myglyphstrokecolour, myglyphstrokewidth, myglyphdashed)
-		
+
 		# increase offset
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
 			yoffset -= (ascender(font) - descender(font)) / mm * ratio
@@ -741,20 +721,20 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 				xoffset += g.layers[0].bounds.size.width / mm * ratio
 			else:
 				xoffset += g.layers[0].width / mm * ratio
-	
+
 		#tick = fl.TickProgress((i) * len(fonts) + i_f + 1)
-	
+
 	# Aggregate graph objects into a list
-	
+
 	tableobjects = []
 	for table in availablegraphs:
-		if Glyphs.boolDefaults["com_yanone_Autopsy_graph_"+table]:
+		if Glyphs.boolDefaults["com_yanone_Autopsy_graph_" + table]:
 			reports[glyphName][table].glyphname = glyphName
 			reports[glyphName][table].graphname = table
 			reports[glyphName][table].drawpointsvalues = Glyphs.boolDefaults["com_yanone_Autopsy_drawpointsvalues"]
-			
-			reports[glyphName][table].scope = Glyphs.defaults["com_yanone_Autopsy_graph_"+table + '_scope']
-			
+
+			reports[glyphName][table].scope = Glyphs.defaults["com_yanone_Autopsy_graph_" + table + '_scope']
+
 			if graphcolour.has_key(table):
 				reports[glyphName][table].strokecolour = graphcolour[table]
 			else:
@@ -766,16 +746,16 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 	for t, table in enumerate(tableobjects):
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
 			tablewidth = ((graphcoords['right'] - graphcoords['left']) - (tableseparator * (len(tableobjects) - 1))) / len(tableobjects)
-			tableheight = reports[glyphName]['height'].sum/mm*ratio
+			tableheight = reports[glyphName]['height'].sum / mm * ratio
 			table.left = graphcoords['left'] + t * (tablewidth + tableseparator)
 			table.right = table.left + tablewidth
 			table.top = graphcoords['top']
 			table.bottom = table.top - tableheight
 		else:
 			if reports[glyphName]['width']:
-				tablewidth = reports[glyphName]['width'].sum/mm*ratio
+				tablewidth = reports[glyphName]['width'].sum / mm * ratio
 			else:
-				tablewidth = reports[glyphName]['bboxwidth'].sum/mm*ratio
+				tablewidth = reports[glyphName]['bboxwidth'].sum / mm * ratio
 			tableheight = ((graphcoords['top'] - graphcoords['bottom']) - (tableseparator * (len(tableobjects) - 1))) / len(tableobjects)
 			table.left = graphcoords['left']
 			table.right = table.left + tablewidth
@@ -786,16 +766,15 @@ def drawGlyph(fonts, glyphName, i, ratio, reports):
 	# PDF Bookmarks
 	# pdf.bookmarkPage(glyphName)
 	# pdf.addOutlineEntry(None, glyphName, 0, 0)
-	
 
 def runAutopsy(fonts, glyphNames):
 	if fonts and glyphNames:
-		
+
 		starttime = time.time()
-		
+
 		global pagewidth, pageheight
 		#global myDialog
-		
+
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
 			if not Glyphs.boolDefaults["com_yanone_Autopsy_PageSize_a4"]:
 				pagewidth = letter[0]
@@ -810,15 +789,15 @@ def runAutopsy(fonts, glyphNames):
 			else:
 				pagewidth = A4[1]
 				pageheight = A4[0]
-		
+
 		#############
 		#
 		# Collect information about the glyphs
 		#
-	
+
 		# Dimensions
 		reports = Ddict(dict)
-	
+
 		glyphwidth = Ddict(dict)
 		maxwidthperglyph = Ddict(dict)
 		maxwidth = 0
@@ -827,9 +806,9 @@ def runAutopsy(fonts, glyphNames):
 		maxheightperglyph = Ddict(dict)
 		maxheight = 0
 		maxsingleheight = 0
-		
+
 		for glyphName in glyphNames:
-	
+
 			glyphwidth[glyphName] = 0
 			glyphheight[glyphName] = 0
 			maxwidthperglyph[glyphName] = 0
@@ -854,7 +833,7 @@ def runAutopsy(fonts, glyphNames):
 					if widthforgraph == 0:
 						widthforgraph = g.bounds.size.width
 					heightforgraph = height
-	
+
 					# width of kegel
 					reports[glyphName]['width'].addvalue((glyphwidth[glyphName], widthforgraph, heightforgraph))
 					# sum of widths per glyph
@@ -862,7 +841,7 @@ def runAutopsy(fonts, glyphNames):
 						maxwidth = reports[glyphName]['width'].sum
 					if reports[glyphName]['width'].max > maxsinglewidth:
 						maxsinglewidth = reports[glyphName]['width'].max
-						
+
 					# height of kegel
 					glyphheight[glyphName] = height
 					reports[glyphName]['height'].addvalue((glyphheight[glyphName], widthforgraph, heightforgraph))
@@ -871,38 +850,35 @@ def runAutopsy(fonts, glyphNames):
 						maxheight = reports[glyphName]['height'].sum
 					if reports[glyphName]['height'].max > maxsingleheight:
 						maxsingleheight = reports[glyphName]['height'].max
-					
+
 					# BBox
 					overthetop = 20000
-					
+
 					bbox = g.bounds
-					
-					if bbox.size.width < -1*overthetop or bbox.size.width > overthetop:
+
+					if bbox.size.width < -1 * overthetop or bbox.size.width > overthetop:
 						reports[glyphName]['bboxwidth'].addvalue((0, widthforgraph, heightforgraph))
 					else:
 						reports[glyphName]['bboxwidth'].addvalue((bbox.size.width, widthforgraph, heightforgraph))
-					
-					if bbox.size.height < -1*overthetop or bbox.size.height > overthetop:
+
+					if bbox.size.height < -1 * overthetop or bbox.size.height > overthetop:
 						reports[glyphName]['bboxheight'].addvalue((0, widthforgraph, heightforgraph))
 					else:
 						reports[glyphName]['bboxheight'].addvalue((bbox.size.height, widthforgraph, heightforgraph))
-					
-					
-					if (bbox.origin.y + bbox.size.height) < -1*overthetop or (bbox.origin.y + bbox.size.height) > overthetop:
+
+					if (bbox.origin.y + bbox.size.height) < -1 * overthetop or (bbox.origin.y + bbox.size.height) > overthetop:
 						reports[glyphName]['highestpoint'].addvalue((0, widthforgraph, heightforgraph))
 					else:
 						reports[glyphName]['highestpoint'].addvalue((bbox.origin.y + bbox.size.height, widthforgraph, heightforgraph))
-					
-					if bbox.origin.y < -1*overthetop or bbox.origin.y > overthetop:
+
+					if bbox.origin.y < -1 * overthetop or bbox.origin.y > overthetop:
 						reports[glyphName]['lowestpoint'].addvalue((0, widthforgraph, heightforgraph))
 					else:
 						reports[glyphName]['lowestpoint'].addvalue((bbox.origin.y, widthforgraph, heightforgraph))
-					
+
 					# L + R sidebearing
 					reports[glyphName]['leftsidebearing'].addvalue((g.LSB, widthforgraph, heightforgraph))
 					reports[glyphName]['rightsidebearing'].addvalue((g.RSB, widthforgraph, heightforgraph))
-
-		
 
 		# Recalculate drawing boards
 		numberoftables = 0
@@ -919,7 +895,6 @@ def runAutopsy(fonts, glyphNames):
 			r = .8
 		SetScrapBoard(r)
 
-			
 		# Calculate ratio
 		global ratio
 		if Glyphs.intDefaults["com_yanone_Autopsy_PageOrientation"] == Portrait:
@@ -938,53 +913,50 @@ def runAutopsy(fonts, glyphNames):
 				ratio = maxratio
 			if ratio > ratio2:
 				ratio = ratio2
-		
-		
+
 		# PDF Init stuff
 		filename = Glyphs.defaults["com_yanone_Autopsy_filename"]
-		tempFileName = NSTemporaryDirectory()+"%d.pdf"%random.randint(1000,100000)
-		
-		pageRect = CGRectMake (0, 0, pagewidth, pageheight)
-		
+		tempFileName = NSTemporaryDirectory() + "%d.pdf" % random.randint(1000, 100000)
+
+		pageRect = CGRectMake(0, 0, pagewidth, pageheight)
+
 		fileURL = NSURL.fileURLWithPath_(tempFileName)
 		pdfContext = CGPDFContextCreateWithURL(fileURL, pageRect, None)
 		CGPDFContextBeginPage(pdfContext, None)
-		
+
 		pdfNSGraphicsContext = NSGraphicsContext.graphicsContextWithGraphicsPort_flipped_(pdfContext, False)
 		NSGraphicsContext.saveGraphicsState()
 		NSGraphicsContext.setCurrentContext_(pdfNSGraphicsContext)
-		
+
 		try:
-		
+
 			drawTitlePage(fonts)
 			CGPDFContextEndPage(pdfContext)
 			### MAIN PAGES ###
-		
-			
+
 			for i, glyphName in enumerate(glyphNames):
 				CGPDFContextBeginPage(pdfContext, None)
 				drawGlyph(fonts, glyphName, i, ratio, reports)
 				# End page
 				CGPDFContextEndPage(pdfContext)
-			
+
 		except:
 			print "__Main"
 			print traceback.format_exc()
-			
+
 		finally:
 			# close PDF
 			NSGraphicsContext.restoreGraphicsState()
 			CGPDFContextClose(pdfContext)
-		
+
 		output("time: " + str(time.time() - starttime) + "sec, ca." + str((time.time() - starttime) / len(glyphNames)) + "sec per glyph")
-		
-		
+
 		if errors:
 			print "__Errors", errors
 			for error in errortexts:
 				#print "__Message", error, programname
 				dlg = message(error)
-			
+
 		# if not errors and fonts and myDialog.openPDF:
 		if not errors and fonts:
 			try:
@@ -1005,8 +977,6 @@ def launchfile(path):
 def output(text):
 	if verbose:
 		print "> " + str(text) + " <"
-
-
 
 '''
 
